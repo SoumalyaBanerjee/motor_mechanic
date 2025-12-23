@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bike Service Booking</title>
+</head>
+<body>
+  <h2>Book a Mechanic</h2>
+  <form id="bookingForm">
+    <label>Customer ID: <input type="number" id="customer_id" required></label><br>
+    <label>Mechanic:
+      <select id="mechanic_id"></select>
+    </label><br>
+    <label>Bike Brand: <input type="text" id="bike_brand" required></label><br>
+    <label>Bike Model: <input type="text" id="bike_model" required></label><br>
+    <label>Bike Reg No: <input type="text" id="bike_reg_no"></label><br>
+    <label>Service Category: <input type="text" id="service_category" required></label><br>
+    <label>Service Type: <input type="text" id="service_type" required></label><br>
+    <label>Date: <input type="date" id="preferred_date" required></label><br>
+    <label>Time: <input type="time" id="preferred_time" required></label><br>
+    <label>Notes: <input type="text" id="service_notes"></label><br>
+    <label>Estimated Cost: <input type="number" id="estimated_cost" required></label><br>
+    <label>Payment Method:
+      <select id="payment_method">
+        <option value="CASH">CASH</option>
+        <option value="UPI">UPI</option>
+      </select>
+    </label><br>
+    <button type="submit">Book Now</button>
+  </form>
+
+  <script>
+    async function loadMechanics() {
+      const res = await fetch("http://localhost:8000/mechanics");
+      const mechanics = await res.json();
+      const select = document.getElementById("mechanic_id");
+      mechanics.forEach(m => {
+        const option = document.createElement("option");
+        option.value = m.mechanic_id;
+        option.text = `${m.mechanic_name} (${m.workshop_name})`;
+        select.add(option);
+      });
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const bookingData = {
+        customer_id: parseInt(document.getElementById("customer_id").value),
+        mechanic_id: parseInt(document.getElementById("mechanic_id").value),
+        bike_brand: document.getElementById("bike_brand").value,
+        bike_model: document.getElementById("bike_model").value,
+        bike_reg_no: document.getElementById("bike_reg_no").value,
+        service_category: document.getElementById("service_category").value,
+        service_type: document.getElementById("service_type").value,
+        preferred_date: document.getElementById("preferred_date").value,
+        preferred_time: document.getElementById("preferred_time").value,
+        service_notes: document.getElementById("service_notes").value,
+        estimated_cost: parseFloat(document.getElementById("estimated_cost").value),
+        payment_method: document.getElementById("payment_method").value
+      };
+
+      const res = await fetch("http://localhost:8000/create_booking", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(bookingData)
+      });
+      const result = await res.json();
+      alert(`Booking Successful! Order ID: ${result.order_id}`);
+    });
+
+    loadMechanics();
+  </script>
+</body>
+</html>
